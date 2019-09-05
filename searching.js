@@ -53,7 +53,9 @@ function binarySearch(array, value, start, end){
  * step 3: 3 + 4 = 7/2 = 3 => *** 8
  */
 
-console.log(binarySearch([3, 5, 6, 8, 11, 12, 14, 15, 17, 18], 16));
+//console.log(binarySearch([3, 5, 6, 8, 11, 12, 14, 15, 17, 18], 16));
+
+//console.log(indexOf([3, 5, 6, 8, 11, 12, 14, 15, 17, 18], 5));
 /**
  * step 1: 0 + 10 = 10/2 = 5 => 12 < 16 ==> [14 -> 18]
  * step 2: 6 + 10 = 16/2 = 8 => 17 > 16 ==> [14 -> 15]
@@ -61,9 +63,6 @@ console.log(binarySearch([3, 5, 6, 8, 11, 12, 14, 15, 17, 18], 16));
  * step 4: 7 + 7 = 14/2 = 7 => 15 < 16 ==> 
  * base case => -1
  */
-
-//2. 
-let dataset = [89, 30, 25, 32, 72, 70, 51, 42, 25, 24, 53, 55, 78, 50, 13, 40, 48, 32, 26, 2, 14, 33, 45, 72, 56, 44, 21, 88, 27, 68, 15, 62, 93, 98, 73, 28, 16, 46, 87, 28, 65, 38, 67, 16, 85, 63, 23, 69, 64, 91, 9, 70, 81, 27, 97, 82, 6, 88, 3, 7, 46, 13, 11, 64, 76, 31, 26, 38, 28, 13, 17, 69, 90, 1, 6, 7, 64, 43, 9, 73, 80, 98, 46, 27, 22, 87, 49, 83, 6, 39, 42, 51, 54, 84, 34, 53, 78, 40, 14, 5];
 
 //3. 
 /**
@@ -122,21 +121,102 @@ class BinarySearchTree{
     this.left = null; 
     this.right = null;
   }
+  insert(key, value){
+    if(this.key === null){
+      this.key = key; 
+      this.value = value;
+    }
+    else if(key < this.key){
+      if(this.left === null){
+        this.left = new BinarySearchTree(key, value, this);
+      }else{
+        this.left.insert(key, value);
+      }}
+    else{
+      if(this.right === null){
+        this.right = new BinarySearchTree(key, value, this);
+      }else{
+        this.right.insert(key, value);
+      }}
+  }
 
+  find(key){
+    if(this.key === key){
+      return this.value;
+    }else if(key < this.key && this.left){
+      return this.left.find(key);
+    }else if(key > this.key && this.right){
+      return this.right.find(key);
+    }else{
+      throw new Error('Key Error');
+    }}
 
+  remove(key){
+    if(this.key === key){
+      if(this.left && this.right){
+        //findMin is a helper method
+        const successor = this.right._findMin();
+        this.key = successor.key;
+        this.value = successor.value;
+        successor.remove(successor.key);
+      } else if (this.left){
+        this._replaceWith(this.left);
+      } else if(this.right){
+        this._replaceWith(this.right);
+      } else{
+        this._replaceWith(null);
+      }} else if (key < this.key && this.left){
+      this.left.remove(key);
+    } else if(key > this.key && this.right){
+      this.right.remove(key);
+    } else{
+      throw new Error('Key Error');
+    }}
+
+  _replaceWith(node){
+    if(this.parent){
+      if(this === this.parent.left){
+        this.parent.left = node;
+      } else if (this === this.parent.right){
+        this.parent.right = node;
+      } if(node){
+        node.parent = this.parent;
+      }} else{
+      if(node){
+        this.key = node.key;
+        this.value = node.value;
+        this.left = node.left;
+        this.right = node.right;
+      } else{
+        this.key = null;
+        this.value = null;
+        this.left = null; 
+        this.right = null;
+      }}
+  }
+
+  _findMin(){
+    if(!this.left){
+      return this;
+    }
+    return this.left._findMin();
+  }
   //go all the way left then return up one and got right...
   //and again..always pusing the left most first
   /**
+   * In Order?
    * recursive left 
    * process
    * recursive right
    */
   depthFirstSearch(values=[]){
     if(this.left){
+      console.log('step 1');
       values = this.left.depthFirstSearch(values);
     }
     values.push(this.values);
     if(this.right){
+      console.log('step 2');
       values = this.right.depthFirstSearch(values);
     }
     return values;
@@ -163,14 +243,91 @@ class BinarySearchTree{
 
 //4. 
 
+//in-order - (left child, parent, right child) 
+//pre-order (parent, left child, right child) 
+//post-order (left child, right child, parent)
+
 /**
  * Given a binary search tree whose in-order and pre-order 
  * traversals are respectively 14 15 19 25 27 35 79 89 90 91 
  * and 35 25 15 14 19 27 89 79 91 90. What would be its postorder 
  * traversal?
+ *  
+ * in-order : 14, 15, 19, 25,   27,  35, 79, 89, 90, 91
+ * pre-order : 35, 25, 15, 14, 19, 27, 89, 79, 91, 90
  * 
+ *             
+ *           
+ *             27         
+ *      /              \ 
+ *    15               90
+ *   / \              /     \
+ * 14   19           79     91
+ *        \          /\
+ *        25        35 89
+ *                  
+ *                 
  * 
- *
  * 2) The post order traversal of a binary search tree is 
  * 5 7 6 9 11 10 8. What is its pre-order traversal?
+ * 
+ * 5 6 7 8 9 10 11
+ * 
+ *        8
+ *   6         10
+ * 5  7      9   11
+ * 
+ * 
+ *    6 5 7 8 10 9 11
+ * 
  */
+
+
+function main(){
+  let bst = new BinarySearchTree();
+  //console.log(bst.depthFirstSearch([25, 15, 50, 10, 24, 35, 70, 4, 12, 18, 31, 44, 66, 90, 22]));
+}
+
+console.log(main());
+
+
+
+
+
+
+//interview question
+/**
+ * given postorder 
+ * construct the BinarySearchTree 
+ * 
+ * input: 8, 12, 10, 16, 25, 20, 15
+ * 
+ *  left-child right-child parent
+ * 
+ * output:
+ * 
+ *        15
+ *   10       20
+ * 8  12    16  25
+ * 
+ * start with last: that's your root
+ * find the next value that is smaller than the
+ * roo (ie 10)
+ * then find the next smallest...
+ * 
+ */
+
+// function postToBST(arr, start = 0, end = length - 1){
+//   if(start => end){
+//     return;
+//   }
+//   let bst = new bst(arr[end]);
+//   let i=0;
+//   for(i=end; i>=start; i--){
+//     if(arr[i]<bst.key){
+//       break;
+//     }
+//   }
+//   bst.left = postToBST(arr, start, i);
+//   bst.right = postToBST(arr, i+1, end -1);
+// }
